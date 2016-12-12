@@ -108,9 +108,9 @@ class DeathDayEvaluator:
     def refresh_info(self):
         # Repopulate page titles with information from worm_info
         for label in self.labels:
-            if (self.worm_info.loc[self.worm_positions[self.well_index]].notnull())[label]:
+            if label != 'Notes' and (self.worm_info.loc[self.worm_positions[self.well_index]].notnull())[label]:
                 self.rw.flipbook.pages[
-                    self.worm_info.loc[self.worm_positions[self.well_index]][label]].name=label
+                    int(self.worm_info.loc[self.worm_positions[self.well_index]][label])].name=label
         if (self.worm_info.loc[self.worm_positions[self.well_index]].notnull())['Notes']:
             self.rw.qt_object.nf.set_text(self.worm_info.loc[self.worm_positions[self.well_index]]['Notes'])
         else:
@@ -140,15 +140,11 @@ class DeathDayEvaluator:
             self.labels = list(self.worm_info.columns.values)
             print('annotations read from '+str(load_path))
     
-    #def test_bad_info(self):
-        #print('Unfilled \'Notes\' Field')
-        #print(numpy.where([len(note) == 0 for note in self.worm_info['Notes'])[0][0])
-    
     def goto_index(self):
         idx_dialog = Qt.QInputDialog()
-        idx_dialog.setInputMode(Qt.QInputDialog.IntMode)
-        if idx_dialog.exec_() and pos_dialog.intValue() in range(len(self.worm_positions)):
-            self.setIndex(pos_dialog.intValue())
+        idx_dialog.setInputMode(Qt.QInputDialog.IntInput)
+        if idx_dialog.exec_() and idx_dialog.intValue() in range(len(self.worm_positions)):
+            self.load_next_worm(idx_dialog.intValue(),0)
 
 class NoteField(Qt.QWidget):
     '''
