@@ -32,7 +32,7 @@ class MaskEditor:
         
         self.file_globs = ['*bf.png', '*mask.png']
         self.expt_dir = pathlib.Path(expt_dir)
-        self.work_dir = self.expt_dir/'masks'   # Super folder for masks
+        self.work_dir = self.expt_dir/'work_dir'   # Super folder for masks
         self.all_images, self.worm_positions = self.parse_inputs()
         
         self.editing = False
@@ -72,16 +72,18 @@ class MaskEditor:
     def parse_inputs(self): 
         worm_positions=[]
         compiled_images={file_glob:[] for file_glob in self.file_globs}
-        for subdir in list(self.work_dir.iterdir()):
-            r=re.search('\d{1,3}[/]?$', str(subdir))    # For post processed images....
-            worm_positions.append(('/'+r.group()))           
-            for file_glob in compiled_images.keys():
+        for subdir in list(self.work_dir.iterdir()): 
+            if subdir.is_dir():
+                r=re.search('\d{1,3}[/]?$', str(subdir))    # For post processed images....
+                worm_positions.append(('/'+r.group()))           
+                for file_glob in compiled_images.keys():
                 #~ if 'mask' in file_glob:
                     #~ compiled_images[file_glob].append(subdir.glob(file_glob))
                     
                 #~ else:
                     #~ compiled_images[file_glob].append((self.expt_dir/subdir.parts[-1]).glob(file_glob))
-                compiled_images[file_glob].append(subdir.glob(file_glob))   # Assuming bf images in same directory
+                    compiled_images[file_glob].append(sorted(subdir.glob(file_glob)))   # Assuming bf images in same directory
+        #compiled_images=sorted(compiled_images)        
         print('finished parsing inputs')
         return compiled_images, worm_positions
     
@@ -90,8 +92,8 @@ class MaskEditor:
             loaded_info = pd.read_csv(self.ann_fpath.open(),sep='\t',index_col=0)
             # Sift through and only keep references to kept worms
             to_drop = []
-            for worm in self.worm_positions:
-                if worm not in loaded_info.index:
+            for worm in loaded_info.index:
+                if worm not in self.worm_positions: 
                     to_drop.append(worm)
             self.worm_info = loaded_info.drop(to_drop)
             print('annotations read from '+str(self.ann_fpath))
