@@ -93,7 +93,7 @@ class DeathDayEvaluator:
             worm_positions.append(r.group()[:-1])   # Remove trailing '/'
             all_images=glob.glob(item+self.image_glob)
             all_images=list(map(pathlib.Path,all_images))
-            meow.append(all_images)
+            meow.append(sorted(all_images))
         print('finished parsing inputs')
         return meow, worm_positions
         
